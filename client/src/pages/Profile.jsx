@@ -10,6 +10,7 @@ import {
   deleteUserStart,
   deleteUserSuccess,
   deleteUserFailure,
+  logOutUserStart,
 } from '../redux/user/userSlice';
 
 const Profile = () => {
@@ -23,6 +24,21 @@ const Profile = () => {
 
   const handlePasswordVisibility = () => {
     setShowPassword(!showPassword);
+  };
+
+  const handleLogOut = async () => {
+    try {
+      dispatch(logOutUserStart());
+      const res = await fetch('/server/auth/logout');
+      const data = await res.json();
+      if (data.success === false) {
+        dispatch(deleteUserFailure(data.message));
+        return;
+      }
+      dispatch(deleteUserSuccess(data));
+    } catch (error) {
+      dispatch(deleteUserFailure(error.message));
+    }
   };
 
   const handleDeleteUser = async () => {
@@ -178,7 +194,7 @@ const Profile = () => {
             </span>
 
             <span
-              // onClick={handleLogOut}
+              onClick={handleLogOut}
               className="text-red-600 text-sm cursor-pointer hover:underline"
             >
               Cerrar sesión
