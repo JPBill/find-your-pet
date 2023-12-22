@@ -2,14 +2,52 @@ import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { AiFillEye, AiFillEyeInvisible } from 'react-icons/ai';
 import { Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import {
+  updateUserStart,
+  updateUserSuccess,
+  updateUserFailure,
+} from '../redux/user/userSlice';
 
 const Profile = () => {
-  const { currentUser } = useSelector((state) => state.user);
+  const { currentUser, loading, error } = useSelector((state) => state.user);
+
+  const dispatch = useDispatch();
 
   const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({});
+  const [updateSucess, setUpdateSuccess] = useState(false);
 
   const handlePasswordVisibility = () => {
     setShowPassword(!showPassword);
+  };
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      dispatch(updateUserStart());
+      const res = await fetch(`/server/user/update/${currentUser._id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      if (data.success === false) {
+        dispatch(updateUserFailure(data.message));
+        return;
+      }
+
+      dispatch(updateUserSuccess(data));
+      setUpdateSuccess(true);
+    } catch (error) {
+      dispatch(updateUserFailure(error.message));
+    }
   };
 
   return (
@@ -30,7 +68,7 @@ const Profile = () => {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <form className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label
                 htmlFor="email"
@@ -43,7 +81,7 @@ const Profile = () => {
                   id="username"
                   name="username"
                   defaultValue={currentUser.username}
-                  // onChange={handleChange}
+                  onChange={handleChange}
                   type="text"
                   autoComplete="username"
                   required
@@ -65,7 +103,7 @@ const Profile = () => {
                   name="email"
                   type="email"
                   defaultValue={currentUser.email}
-                  // onChange={handleChange}
+                  onChange={handleChange}
                   autoComplete="email"
                   required
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
@@ -103,8 +141,11 @@ const Profile = () => {
               >
                 Añadir mascota
               </Link>
-              <button className="mt-2 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-teal-600 bg-gray-200 transition hover:text-teal-600/75 focus:outline-none">
-                Guardar cambios de mi cuenta
+              <button
+                disabled={loading}
+                className="mt-2 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-teal-600 bg-gray-200 transition hover:text-teal-600/75 focus:outline-none"
+              >
+                {loading ? 'Cargando...' : 'Guardar cambios de mi cuenta'}
               </button>
             </div>
           </form>
@@ -123,6 +164,10 @@ const Profile = () => {
               Cerrar sesión
             </span>
           </div>
+          <p className="text-red-700 mt-4">{error ? error : ''}</p>
+          <p className="text-green-700 mt-4">
+            {updateSucess ? 'Usuario actualizado éxitosamente' : ''}
+          </p>
         </div>
       </div>
     </div>
