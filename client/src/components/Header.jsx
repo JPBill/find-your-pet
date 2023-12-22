@@ -1,9 +1,10 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { IoIosSearch } from 'react-icons/io';
 import { FaRegUserCircle } from 'react-icons/fa';
 
 const Header = () => {
+  const { currentUser } = useSelector((state) => state.user);
   return (
     <header className="bg-white">
       <div className="mx-auto max-w-screen-xl px-4 sm:px-8 lg:px-24 mt-4">
@@ -35,25 +36,15 @@ const Header = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="sm:flex sm:gap-4">
-              <Link
-                to="/login"
-                className="hidden rounded-md bg-teal-600 px-5 py-2 text-sm font-medium text-white transition hover:bg-teal-700 md:block"
-              >
-                Iniciar sesión
-              </Link>
-
-              <Link
-                to="/register"
-                className="hidden rounded-md bg-gray-100 px-5 py-2 text-sm font-medium text-teal-600 transition hover:text-teal-600/75 md:block"
-              >
-                Registrate
-              </Link>
-            </div>
-
-            <div className="block md:hidden">
-              <FaRegUserCircle className="h-6 w-6 text-gray-600" />
-            </div>
+            <Link to="/profile">
+              {currentUser ? (
+                <FaRegUserCircle className="h-6 w-6 text-gray-600" />
+              ) : (
+                <span className="rounded-md bg-teal-600 px-5 py-2 text-sm font-medium text-white transition hover:bg-teal-700">
+                  Registrate
+                </span>
+              )}
+            </Link>
           </div>
         </div>
       </div>
