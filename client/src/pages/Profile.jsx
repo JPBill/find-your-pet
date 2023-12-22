@@ -7,6 +7,9 @@ import {
   updateUserStart,
   updateUserSuccess,
   updateUserFailure,
+  deleteUserStart,
+  deleteUserSuccess,
+  deleteUserFailure,
 } from '../redux/user/userSlice';
 
 const Profile = () => {
@@ -20,6 +23,23 @@ const Profile = () => {
 
   const handlePasswordVisibility = () => {
     setShowPassword(!showPassword);
+  };
+
+  const handleDeleteUser = async () => {
+    try {
+      dispatch(deleteUserStart());
+      const res = await fetch(`/server/user/delete/${currentUser._id}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (data.success === false) {
+        dispatch(deleteUserFailure(data.message));
+        return;
+      }
+      dispatch(deleteUserSuccess(data));
+    } catch (error) {
+      dispatch(deleteUserFailure(error.message));
+    }
   };
 
   const handleChange = (e) => {
@@ -151,7 +171,7 @@ const Profile = () => {
           </form>
           <div className="flex justify-between mt-6">
             <span
-              // onClick={handleDeleteUser}
+              onClick={handleDeleteUser}
               className="text-red-600 text-sm cursor-pointer hover:underline"
             >
               Eliminar cuenta
