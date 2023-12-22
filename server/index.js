@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 
 import userRouter from './routes/userRoute.js';
 import authRouter from './routes/authRoute.js';
+import petListingRouter from './routes/petListingRoute.js';
 
 dotenv.config();
 const app = express();
@@ -14,6 +15,7 @@ app.use(cookieParser());
 // routes
 app.use('/server/user', userRouter);
 app.use('/server/auth', authRouter);
+app.use('/server/pet-listing', petListingRouter);
 
 // connect to DB
 mongoose
