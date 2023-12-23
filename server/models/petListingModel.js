@@ -6,18 +6,11 @@ const petListingSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    name: {
-      type: String,
-    },
     description: {
       type: String,
       required: true,
     },
     location: {
-      type: String,
-      required: true,
-    },
-    address: {
       type: String,
       required: true,
     },
