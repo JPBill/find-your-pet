@@ -23,8 +23,8 @@ const petListingSchema = new mongoose.Schema(
     facebook: {
       type: String,
     },
-    imagesUrls: {
-      type: Array,
+    image: {
+      type: String,
       required: true,
     },
   },

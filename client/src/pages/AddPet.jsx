@@ -1,3 +1,9 @@
+import { useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { BsCloudUpload } from 'react-icons/bs';
+import { imageToBase64 } from '../utility/imageToBase64';
+
 const kindOfAnimal = [
   { id: 'dog', title: 'Perro/a' },
   { id: 'cat', title: 'Gato/a' },
@@ -5,6 +11,74 @@ const kindOfAnimal = [
 ];
 
 const AddPet = () => {
+  const { currentUser } = useSelector((state) => state.user);
+  const [formData, setFormData] = useState({
+    image: '',
+    animal: '',
+    description: '',
+    location: '',
+  });
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();
+
+  const handleOnChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData((preve) => {
+      return {
+        ...preve,
+        [name]: value,
+      };
+    });
+  };
+
+  const uploadImage = async (e) => {
+    const data = await imageToBase64(e.target.files[0]);
+
+    setFormData((preve) => {
+      return {
+        ...preve,
+        image: data,
+      };
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const { animal, location, description, image } = formData;
+    const isValid = animal && location && description && image;
+
+    if (isValid) {
+      try {
+        const res = await fetch('/server/pet-listing/create', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...formData,
+            useRef: currentUser._id,
+          }),
+        });
+
+        const data = await res.json();
+        setLoading(false);
+
+        if (data.success === false) {
+          console.log('Mascota añadida exitosamente!');
+          setError(data.message);
+        }
+        navigate(`/listing/${data._id}`);
+      } catch (error) {
+        setError(error.message);
+        setLoading(false);
+      }
+    }
+  };
+
   return (
     <div className="min-h-full flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -15,7 +89,7 @@ const AddPet = () => {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-lg">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <form className="space-y-6">
+          <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="mt-6">
               <label className="text-sm font-medium text-gray-700">
                 Animal
@@ -28,9 +102,10 @@ const AddPet = () => {
                     <div key={animal.id} className="flex items-center">
                       <input
                         id={animal.id}
-                        name="kind-of-animal"
+                        name="animal"
                         type="radio"
-                        defaultChecked={animal.id === 'dog'}
+                        value={animal.id}
+                        onChange={handleOnChange}
                         className="focus:ring-gray-500 h-4 w-4 text-gray-600 border-gray-300"
                       />
                       <label
@@ -53,35 +128,43 @@ const AddPet = () => {
                 </label>
                 <div className="mt-2">
                   <textarea
+                    type="text"
                     rows={4}
                     name="description"
                     id="description"
+                    onChange={handleOnChange}
+                    value={formData.description}
                     placeholder="Hembra adulta de tamaño mediano..."
                     className="appearance-none px-3 py-2 border shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500 block w-full sm:text-sm border-gray-300 rounded-md placeholder:text-sm"
-                    defaultValue={''}
                   />
                 </div>
               </div>
               <div>
                 <label
-                  className="block mt-6 mb-2 text-sm font-medium text-gray-700"
-                  htmlFor="multiple_files"
+                  className="block mt-6 text-sm font-medium text-gray-700"
+                  htmlFor="image"
                 >
-                  Imágenes
+                  Imagen
+                  <div className="mt-2 flex h-40 w-full cursor-pointer items-center justify-center rounded bg-slate-200">
+                    {formData.image ? (
+                      <img src={formData.image} className="h-full" alt="Pet" />
+                    ) : (
+                      <span className="text-3xl">
+                        <BsCloudUpload />
+                      </span>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      id="image"
+                      name="image"
+                      className="hidden"
+                      onChange={uploadImage}
+                    />
+                  </div>
                 </label>
-                <input
-                  className="block w-full text-sm text-gray-900 border border-gray-300 rounded-md cursor-pointer bg-gray-50"
-                  id="multiple_files"
-                  type="file"
-                  accept="image/*"
-                  multiple
-                />
               </div>
-              <div className="mt-3">
-                <button className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-teal-600 bg-gray-200 transition hover:text-teal-600/75 focus:outline-none">
-                  Subir imágenes
-                </button>
-              </div>
+
               <div className="mt-6">
                 <label
                   htmlFor="location"
@@ -95,6 +178,8 @@ const AddPet = () => {
                     name="location"
                     type="text"
                     maxLength="40"
+                    onChange={handleOnChange}
+                    value={formData.location}
                     placeholder="Rosario, Santa Fe"
                     required
                     className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
@@ -102,9 +187,13 @@ const AddPet = () => {
                 </div>
               </div>
               <div className="mt-6">
-                <button className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
-                  Añadir a la lista de adopción
+                <button
+                  disabled={loading}
+                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
+                >
+                  {loading ? 'Añadiendo...' : 'Añadir a la lista de adopción'}
                 </button>
+                {error && <p className="text-red-700 text-sm mt-4">{error}</p>}
               </div>
             </div>
           </form>
