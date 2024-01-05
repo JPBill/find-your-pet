@@ -15,7 +15,7 @@ app.use(cookieParser());
 // routes
 app.use('/server/user', userRouter);
 app.use('/server/auth', authRouter);
-app.use('/server/pet-listing', petListingRouter);
+app.use('/server/listing', petListingRouter);
 
 // connect to DB
 mongoose

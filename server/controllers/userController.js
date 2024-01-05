@@ -1,7 +1,7 @@
 import bcryptjs from 'bcryptjs';
 import { errorHandler } from '../utils/error.js';
 import User from '../models/userModel.js';
-import petListing from '../models/petListingModel.js';
+import PetListing from '../models/PetListingModel.js';
 
 export const test = (req, res) => {
   res.json({
@@ -61,7 +61,7 @@ export const deleteUser = async (req, res, next) => {
 export const getUserListings = async (req, res, next) => {
   if (req.user.id === req.params.id) {
     try {
-      const listings = await petListing.find({ userRef: req.params.id });
+      const listings = await PetListing.find({ userRef: req.params.id });
       res.status(200).json(listings);
     } catch (error) {
       next(error);

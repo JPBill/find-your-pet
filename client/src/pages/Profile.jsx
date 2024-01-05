@@ -21,6 +21,8 @@ const Profile = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({});
   const [updateSucess, setUpdateSuccess] = useState(false);
+  const [showListingError, setShowListingError] = useState(false);
+  const [userListings, setUserListings] = useState([]);
 
   const handlePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -83,6 +85,22 @@ const Profile = () => {
       setUpdateSuccess(true);
     } catch (error) {
       dispatch(updateUserFailure(error.message));
+    }
+  };
+
+  const handleShowListing = async () => {
+    try {
+      setShowListingError(false);
+      const res = await fetch(`/server/user/listings/${currentUser._id}`);
+      const data = await res.json();
+      if (data.success === false) {
+        setShowListingError(true);
+        return;
+      }
+      setUserListings(data);
+      console.log(data);
+    } catch (error) {
+      setShowListingError(true);
     }
   };
 
@@ -204,8 +222,53 @@ const Profile = () => {
           <p className="text-green-700 mt-4">
             {updateSucess ? 'Usuario actualizado éxitosamente' : ''}
           </p>
+          <button onClick={handleShowListing} className="text-gray-700">
+            Ver listado
+          </button>
+          <p className="text-red-700 mt-4">
+            {showListingError ? 'Error al mostrar el listado.' : ''}
+          </p>
         </div>
       </div>
+      {userListings && userListings.length > 0 && (
+        <div className="flex flex-col gap-4">
+          <h1 className="text-center mt-7 text-2xl font-semibold">
+            Tu lista de mascotas en adopción
+          </h1>
+          {userListings.map((listing) => (
+            <div
+              key={listing._id}
+              className="border rounded-lg p-3 flex justify-between items-center gap-4"
+            >
+              <Link to={`/listings/${listing._id}`}>
+                <img
+                  src={listing.image}
+                  alt={listing.animal}
+                  className="h-16 w-16 object-contain"
+                />
+              </Link>
+              <Link
+                className="text-slate-700 font-semibold hover:underline truncate flex-1"
+                to={`/listings/${listing._id}`}
+              >
+                <p>{listing.description}</p>
+              </Link>
+
+              <div className="flex flex-col items-center">
+                <button
+                  // onClick={() => handleListingDelete(listing._id)}
+                  className="text-red-700 uppercase"
+                >
+                  Eliminar
+                </button>
+                <Link to={`/update-listings/${listing._id}`}>
+                  <button className="text-green-700 uppercase">Editar</button>
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

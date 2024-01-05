@@ -53,17 +53,16 @@ const AddPet = () => {
 
     if (isValid) {
       try {
-        const res = await fetch('/server/pet-listing/create', {
+        const res = await fetch('/server/listing/create', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             ...formData,
-            useRef: currentUser._id,
+            userRef: currentUser._id,
           }),
         });
-
         const data = await res.json();
         setLoading(false);
 
@@ -71,7 +70,7 @@ const AddPet = () => {
           console.log('Mascota añadida exitosamente!');
           setError(data.message);
         }
-        navigate(`/listing/${data._id}`);
+        navigate(`/listings/${data._id}`);
       } catch (error) {
         setError(error.message);
         setLoading(false);

@@ -27,10 +27,14 @@ const petListingSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    userRef: {
+      type: String,
+      required: true,
+    },
   },
   { timestamps: true }
 );
 
-const petListing = mongoose.model('PetListing', petListingSchema);
+const PetListing = mongoose.model('PetListing', petListingSchema);
 
-export default petListing;
+export default PetListing;
