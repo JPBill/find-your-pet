@@ -6,6 +6,7 @@ import Profile from './pages/Profile';
 import Header from './components/Header';
 import PrivateRoute from './pages/PrivateRoute';
 import AddPet from './pages/AddPet';
+import UpdatePet from './pages/UpdatePet';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route element={<PrivateRoute />}>
           <Route path="/profile" element={<Profile />} />
           <Route path="/add-pet" element={<AddPet />} />
+          <Route path="/update-pet/:listingId" element={<UpdatePet />} />
         </Route>
       </Routes>
     </BrowserRouter>
